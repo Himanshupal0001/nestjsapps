@@ -21,6 +21,7 @@ export class DBModule {
       entities: dbconfig.entities,
       synchronize: true,
       logging: true,
+      autoLoadEntities: true,
     };
   }
 

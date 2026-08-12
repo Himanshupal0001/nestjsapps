@@ -81,6 +81,12 @@ export class UserService {
     return users;
   }
 
+  async updateRefreshToken(id: number, token: string) {
+    return this.userRepository.update(id, {
+      refreshToken: token,
+    });
+  }
+
   async findOneByEmail(email: string): Promise<UserEntity | null> {
     return await this.userRepository.findOne({
       where: { email },
