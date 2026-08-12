@@ -5,6 +5,8 @@ import { createDocument } from './config/swagger/swagger';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  const globalPrifix = 'api/v1';
+  app.setGlobalPrefix(globalPrifix);
   createDocument(app);
   app.useGlobalPipes(new ValidationPipe());
   await app.listen(process.env.PORT ?? 8000);
