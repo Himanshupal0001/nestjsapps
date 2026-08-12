@@ -157,3 +157,22 @@ Learn more about the power of Turborepo:
 - [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
 - [Configuration Options](https://turborepo.dev/docs/reference/configuration)
 - [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+
+## Command use to run create the project from scrach
+
+I am using pnpm , other options are npm and yarn.
+Make sure to install tubro cli globally
+Nodejs,bun or deno
+
+In the root folder write command
+pnpm dlx create-turbo@latest
+This will give to scaffold project structure of the app.
+GO into rootfolder/apps
+Run this command
+pnpm dlx @nestjs/cli@latest new api --package-manager pnpm --skip-install --skip-git
+I am using npx equivlant command to run nestjs cli without installing itto create nestjs prject.
+
+After this cd into rot directly and run pnpm install. It will hoist the dependencies into the root folder to make it run properly
+
+Command to check installed packages in backend
+pnpm --filter backend list --depth 0
