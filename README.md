@@ -176,3 +176,6 @@ After this cd into rot directly and run pnpm install. It will hoist the dependen
 
 Command to check installed packages in backend
 pnpm --filter backend list --depth 0
+
+add swagger
+pnpm --filter=backend add @nestjs/swagger swagger-ui-express
