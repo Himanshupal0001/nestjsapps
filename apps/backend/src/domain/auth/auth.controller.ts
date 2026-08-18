@@ -1,9 +1,18 @@
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  HttpCode,
+  HttpStatus,
+  Post,
+  Req,
+  Res,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
   ApiConsumes,
+  ApiCookieAuth,
   ApiForbiddenResponse,
   ApiNotFoundResponse,
   ApiOkResponse,
@@ -12,6 +21,9 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { SignInDto } from './dto/signIn.dto';
+import { Request, Response } from 'express';
+import { AuthTokensI } from './common/types';
+import { REFRESH_COOKIE } from './common/contant';
 
 @ApiBearerAuth('authorization')
 @ApiTags('auth api')
@@ -28,7 +40,27 @@ export class AuthController {
   @ApiOkResponse({ description: 'ACCESS GRANTED' })
   @ApiOperation({ description: 'GRANT ACCESS' })
   @Post('signin')
-  async login(@Body() dto: SignInDto) {
-    return await this.authService.SignIn(dto);
+  async login(
+    @Body() dto: SignInDto,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<AuthTokensI> {
+    return await this.authService.SignIn(dto, res);
+  }
+
+  @HttpCode(HttpStatus.OK)
+  @ApiCookieAuth(REFRESH_COOKIE)
+  @ApiUnauthorizedResponse({ description: 'UNAUTHORIZED REQUEST' })
+  @ApiOkResponse({ description: 'TOKEN REFRESHED' })
+  @ApiOperation({
+    summary: 'REFRESH ACCESS TOKEN',
+    description:
+      'Reads the refresh_token http-only cookie, rotates it and returns a new access token',
+  })
+  @Post('refresh')
+  async refresh(
+    @Req() req: Request,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<AuthTokensI> {
+    return await this.authService.getRefreshToken(req, res);
   }
 }
