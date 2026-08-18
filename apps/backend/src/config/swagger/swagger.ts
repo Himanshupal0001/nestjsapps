@@ -1,6 +1,7 @@
 import { INestApplication } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { SWAGGER_CONFIG } from './swagger.config';
+import { REFRESH_COOKIE } from 'src/domain/auth/common/contant';
 
 export function createDocument(app: INestApplication) {
   const builder = new DocumentBuilder()
@@ -13,6 +14,11 @@ export function createDocument(app: INestApplication) {
         bearerFormat: 'JWT',
       },
       'authorization',
+    )
+    .addCookieAuth(
+      REFRESH_COOKIE,
+      { type: 'apiKey', in: 'cookie' },
+      REFRESH_COOKIE,
     )
     .setVersion(SWAGGER_CONFIG.version);
 
