@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsEmail, IsString } from 'class-validator';
+import { IsEmail, IsOptional, IsString } from 'class-validator';
 
 export class FindUserByPropertyDto {
   @ApiProperty({
@@ -7,6 +7,7 @@ export class FindUserByPropertyDto {
     required: true,
     example: 'foo',
   })
+  @IsOptional()
   @IsString()
   name: string;
 
@@ -15,6 +16,7 @@ export class FindUserByPropertyDto {
     required: true,
     example: 'foo@email.com',
   })
+  @IsOptional()
   @IsEmail()
   email: string;
 }
