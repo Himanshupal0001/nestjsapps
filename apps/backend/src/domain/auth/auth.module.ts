@@ -6,6 +6,8 @@ import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
 import { ConfigModule } from '@nestjs/config';
 import refreshJwtConfig from 'src/config/jwt/refresh.jwt.config';
+import { JwtAccessStrategy } from './strategies/jwtAccess-strategy';
+import { JwtRefreshStrategy } from './strategies/jwtRefreshToken.strategy';
 
 @Module({
   imports: [
@@ -15,7 +17,7 @@ import refreshJwtConfig from 'src/config/jwt/refresh.jwt.config';
     ConfigModule.forFeature(refreshJwtConfig),
   ],
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [AuthService, JwtAccessStrategy, JwtRefreshStrategy],
   exports: [AuthService],
 })
 export class AuthModule {}
