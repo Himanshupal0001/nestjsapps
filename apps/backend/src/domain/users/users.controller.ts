@@ -24,6 +24,7 @@ import { AccessTokenGuard } from '../auth/guards/access.token.guard';
 
 @ApiBearerAuth('authorization')
 @ApiTags('user')
+
 @Controller('user')
 export class UserController {
   constructor(private readonly userService: UserService) {}
