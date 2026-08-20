@@ -2,6 +2,7 @@ import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { DbConfig } from './db.interface';
 import { DynamicModule, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { Pool } from 'pg';
 
 @Module({})
 export class DBModule {
