@@ -6,6 +6,7 @@ import {
   Post,
   Req,
   Res,
+  UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import {
@@ -22,8 +23,9 @@ import {
 } from '@nestjs/swagger';
 import { SignInDto } from './dto/signIn.dto';
 import { Request, Response } from 'express';
-import { AuthTokensI } from './common/types';
+import { AuthenticatedRefreshUserI, AuthTokensI } from './common/types';
 import { REFRESH_COOKIE } from './common/contant';
+import { RefreshTokenGuard } from './guards/refresh.token.guard';
 
 @ApiBearerAuth('authorization')
 @ApiTags('auth api')
@@ -56,11 +58,15 @@ export class AuthController {
     description:
       'Reads the refresh_token http-only cookie, rotates it and returns a new access token',
   })
+  @UseGuards(RefreshTokenGuard)
   @Post('refresh')
   async refresh(
     @Req() req: Request,
     @Res({ passthrough: true }) res: Response,
   ): Promise<AuthTokensI> {
-    return await this.authService.getRefreshToken(req, res);
+    return await this.authService.rotateRefreshToken(
+      req.user as AuthenticatedRefreshUserI,
+      res,
+    );
   }
 }

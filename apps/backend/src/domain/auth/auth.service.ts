@@ -10,9 +10,14 @@ import { SignInDto } from './dto/signIn.dto';
 import bcrypt from 'bcrypt';
 import { JwtService, JwtSignOptions } from '@nestjs/jwt';
 import { ConfigService, ConfigType } from '@nestjs/config';
-import { AuthTokensI, JwtPayloadI } from './common/types';
+import {
+  AuthenticatedRefreshUserI,
+  AuthTokensI,
+  JwtPayloadI,
+} from './common/types';
+import { UserEntity } from '../users/entities/users.entity';
 import refreshJwtConfig from 'src/config/jwt/refresh.jwt.config';
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import { REFRESH_COOKIE, REFRESH_TTL_SEC } from './common/contant';
 
 @Injectable()
@@ -66,24 +71,15 @@ export class AuthService {
     };
   }
 
-  async getRefreshToken(req: Request, res: Response): Promise<AuthTokensI> {
-    const refreshToken = req.cookies?.[REFRESH_COOKIE] as string | undefined;
-
-    if (!refreshToken) {
-      throw new UnauthorizedException('Refresh token not found');
-    }
-
-    let payload: JwtPayloadI;
-
-    try {
-      payload = await this.jwtService.verifyAsync<JwtPayloadI>(refreshToken, {
-        secret: this.refreshTokenConfig.secret,
-      });
-    } catch (err) {
-      this.logger.error(err);
-      throw new UnauthorizedException('Refresh token expired or invalid');
-    }
-
+  /**
+   * Called by JwtRefreshStrategy once the cookie's signature has been verified.
+   * Confirms the token is still the one on record, which catches reuse of a
+   * rotated-out token.
+   */
+  async validateRefreshToken(
+    payload: JwtPayloadI,
+    refreshToken: string,
+  ): Promise<UserEntity> {
     const user = await this.userService.getUserById(payload.sub);
 
     if (!user || user.refreshToken !== refreshToken) {
@@ -91,19 +87,26 @@ export class AuthService {
       throw new UnauthorizedException('Refresh token is no longer valid');
     }
 
-    const newPayload: JwtPayloadI = { sub: user.id, email: user.email };
-    const accessToken = this.signAccessToken(newPayload);
-    const newRefreshToken = this.signRefreshToken(newPayload);
+    return user;
+  }
 
-    await this.userService.updateRefreshToken(user.id, newRefreshToken);
-    this.setRefreshCookie(res, newRefreshToken);
+  async rotateRefreshToken(
+    user: AuthenticatedRefreshUserI,
+    res: Response,
+  ): Promise<AuthTokensI> {
+    const payload: JwtPayloadI = { sub: user.id, email: user.email };
+    const accessToken = this.signAccessToken(payload);
+    const refreshToken = this.signRefreshToken(payload);
+
+    await this.userService.updateRefreshToken(user.id, refreshToken);
+    this.setRefreshCookie(res, refreshToken);
 
     return {
       status: true,
       message: 'Token refreshed successfuly',
-      payload: newPayload,
+      payload,
       accessToken,
-      refreshToken: newRefreshToken,
+      refreshToken,
     };
   }
 
