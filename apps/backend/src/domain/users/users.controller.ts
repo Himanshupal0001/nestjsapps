@@ -7,9 +7,20 @@ import {
   ApiTags,
 } from '@nestjs/swagger';
 import { UserService } from './users.service';
-import { Body, Controller, HttpCode, HttpStatus, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  ParseIntPipe,
+  Post,
+  UseGuards,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/createUsers.dto';
 import { CreateUserResponseDto } from './dto/createUserResponse.dto';
+import { AccessTokenGuard } from '../auth/guards/access.token.guard';
 
 @ApiBearerAuth('authorization')
 @ApiTags('user')
@@ -31,5 +42,18 @@ export class UserController {
   @Post('signup')
   async login(@Body() dto: CreateUserDto): Promise<CreateUserResponseDto> {
     return await this.userService.createUser(dto);
+  }
+
+  @UseGuards(AccessTokenGuard)
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({
+    type: CreateUserResponseDto,
+    description: 'User Profile',
+  })
+  @ApiOperation({ description: 'Get user profile' })
+  @ApiConsumes('application/json')
+  @Get('profile/:id')
+  async getProfile(@Param('id', ParseIntPipe) id: number) {
+    return await this.userService.getUserById(id);
   }
 }
