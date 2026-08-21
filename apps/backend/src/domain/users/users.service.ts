@@ -1,3 +1,4 @@
+import { PaginationOptionsDto } from 'src/common/dto/pagination.dto';
 import { Logger, Injectable, ConflictException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from './entities/users.entity';
@@ -5,6 +6,13 @@ import { Like, Repository } from 'typeorm';
 import { CreateUserDto } from './dto/createUsers.dto';
 import * as bcrypt from 'bcrypt';
 import { FindUserByPropertyDto } from './dto/findUserPropery';
+import { DEFAULT_PAGE_LIMIT } from 'src/common/constant';
+import {
+  IPaginationOptions,
+  Pagination,
+  paginate,
+} from 'nestjs-typeorm-paginate';
+import { CreateUserResponseDto } from './dto/createUserResponse.dto';
 
 @Injectable()
 export class UserService {
@@ -53,8 +61,20 @@ export class UserService {
     return await this.userRepository.delete(id);
   }
 
-  async getAllUsers() {
-    return await this.userRepository.find({});
+  async getAllUsers(PaginationOptionsDto: PaginationOptionsDto) {
+    return await this.userRepository.find({
+      skip: PaginationOptionsDto.offset,
+      take: PaginationOptionsDto.limit ?? DEFAULT_PAGE_LIMIT,
+    });
+  }
+
+  async paginate(
+    options: IPaginationOptions,
+  ): Promise<Pagination<CreateUserResponseDto>> {
+    const qb = this.userRepository.createQueryBuilder('q');
+    qb.orderBy('q.id', 'DESC');
+
+    return await paginate<CreateUserResponseDto>(qb, options);
   }
 
   async findUserByEmail(
