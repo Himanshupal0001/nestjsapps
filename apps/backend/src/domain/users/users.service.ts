@@ -20,6 +20,7 @@ export class UserService {
   constructor(
     @InjectRepository(UserEntity)
     private readonly userRepository: Repository<UserEntity>,
+    // private readonly jwtService: JwtService,
   ) {}
 
   async createUser(dto: CreateUserDto): Promise<UserEntity> {

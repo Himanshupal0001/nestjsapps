@@ -14,16 +14,17 @@ import {
   Get,
   HttpCode,
   HttpStatus,
-  Param,
   ParseIntPipe,
   Post,
   Query,
+  Req,
   UseGuards,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/createUsers.dto';
 import { CreateUserResponseDto } from './dto/createUserResponse.dto';
 import { AccessTokenGuard } from '../auth/guards/access.token.guard';
 import { IPaginationOptions, Pagination } from 'nestjs-typeorm-paginate';
+import { Request } from 'express';
 
 @ApiBearerAuth('authorization')
 @ApiTags('user')
@@ -55,9 +56,9 @@ export class UserController {
   })
   @ApiOperation({ description: 'Get user profile' })
   @ApiConsumes('application/json')
-  @Get('profile/:id')
-  async getProfile(@Param('id', ParseIntPipe) id: number) {
-    return await this.userService.getUserById(id);
+  @Get('profile')
+  getProfile(@Req() req: Request) {
+    return req.user;
   }
 
   @UseGuards(AccessTokenGuard)
