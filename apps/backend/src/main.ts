@@ -10,7 +10,13 @@ async function bootstrap() {
   app.use(cookieParser());
   app.setGlobalPrefix(globalPrifix);
   createDocument(app);
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
   await app.listen(process.env.PORT ?? 8000);
   console.log('app is lisning on port', process.env.PORT);
 }
