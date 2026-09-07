@@ -1,7 +1,9 @@
+import { NotesEntity } from 'src/domain/notes/entities/notes.entitiy';
 import {
   Column,
   CreateDateColumn,
   Entity,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -31,4 +33,7 @@ export class UserEntity {
 
   @UpdateDateColumn()
   updatedAt: Date;
+
+  @OneToMany(() => NotesEntity, (notes) => notes.user)
+  notes: NotesEntity[];
 }
